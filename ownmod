@@ -1,0 +1,25 @@
+#!/bin/bash
+if [ ! -t 1 ] ; then
+	xfce4-terminal -H -e=$0
+else
+	wd=${PWD##*/}
+	siteusr=http
+	sitegrp=http
+	workusr=vib
+	workgrp=users
+	cd htdocs
+	sudo find . -type f -exec chmod 0664 {} \;
+	echo Разрешения файлов установлены 
+	sudo find . -type d -exec chmod 0775 {} \;
+	echo Разрешения директорий установлены
+	if [ -d dev ]; then 
+		sudo find . ! -path "./dev*" -exec chown -v $siteusr:$sitegrp {} \;
+		echo Владелец сайта установлен 
+		cd ./dev
+		sudo find . -exec chown $workusr:$workgrp {} \;
+		echo Владелец проекта установлен 
+	else
+		sudo find . -exec chown $siteusr:$sitegrp {} \;
+		echo Владелец сайта установлен 
+	fi
+fi

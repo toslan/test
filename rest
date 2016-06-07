@@ -1,0 +1,94 @@
+#!/bin/bash
+#Восстановление сайта на MODX из архива на сервере
+if [ ! -t 1 ] ; then
+	xfce4-terminal -H -e=$0
+else
+	pname=${PWD##*/}
+	pname=${pname/./} # имя проекта = имя директории без точек
+	aname=$pname.zip # архив проекта
+	srv=circuto3@circutorcomru.420.com1.ru
+	spath=/home/circuto3/work/
+	mkdir -p backup
+	tar --exclude='htdocs/dev/node_modules' --exclude='htdocs/core/cache/*' -pczf $pname.tar.gz htdocs 
+	mysqldump -uroot $pname | gzip > $pname.sql.gz
+	7za a .t.zip $pname.tar.gz $pname.sql.gz
+	cdat=$(stat --format='%Y' .t.zip)
+	bname=backup/$(date -d @$cdat +%y%m%d_%H%M%S)_$aname
+	cp -p .t.zip $bname
+	echo "Cоздан страховочный текущий архив $bname"
+	rm .t.zip 
+	rm $pname.tar.gz
+	rm $pname.sql.gz
+	ldat=0
+	rdat=0
+	ssh -q $srv exit
+	if [ $? -ne 0 ]; then
+		echo "Сервер недоступен"
+	else
+		ssh $srv [ -f $spath$aname ]
+		if [ $? -ne 0 ]; then
+			echo "На сервере нет архива $aname"
+		else
+			rdat=$(ssh $srv stat --format='%Y' $spath$aname)
+			echo $(date -d @$rdat +'%Y.%m.%d %H:%M:%S') - время архива на сервере
+		fi
+	fi
+	if [ ! -f $aname ]; then
+		echo "Локальный архив отсутствует."
+	else
+		ldat=$(stat --format='%Y' $aname)
+		echo $(date -d @$ldat +'%Y.%m.%d %H:%M:%S') - время локального архива
+	fi
+	if [ $ldat -eq 0 ] && [ $rdat -eq 0 ]; then
+		echo "Нет архивов для восстановления. Завершаем работу"
+		exit
+	fi
+	echo Введите:
+	if [ $rdat -gt 0 ]; then
+		echo 1-Восстановить архив с сервера
+	fi
+	if [ $ldat -gt 0 ]; then
+		echo 2-Восстановить локальный архив
+	fi
+	echo 0-Выход без изменений
+	read n
+	case $n in
+  0)	echo "Выходим без изменений"; exit ;;
+  1)	if [ $rdat -eq 0 ]; then
+				echo "Неправильный ввод. Выходим без изменений"
+				exit
+			fi
+			if [ $ldat -gt 0 ]; then
+   			bname=backup/$(date -d @$ldat +%y%m%d_%H%M%S)_$aname
+				cp -p $aname $bname
+				echo "Локальный архив сохранен в $bname"
+				rm $aname
+			fi
+			scp -p $srv:$spath$aname ./
+    	echo "Архив скопирован с удаленного сервера" ;;
+  2)	if [ $ldat -eq 0 ]; then
+				echo "Неправильный ввод. Выходим без изменений"
+				exit
+			fi
+			echo "Восстанавливаем локальный архив";;
+  *)	echo "Неправильный ввод. Выходим без изменений"; exit ;;
+	esac
+	rm -r -f htdocs/assets
+	rm -r -f htdocs/connectors
+	sudo rm -r -f htdocs/core
+	rm -r -f htdocs/manager
+	rm -r -f htdocs/dev/icons
+	rm -r -f htdocs/dev/src
+	rm -f htdocs/dev/*
+	rm -f htdocs/*
+	7za e $aname
+	sudo tar --same-owner -pxzf $pname.tar.gz
+	echo "Файлы проекта восстановлены из архива"
+	mysql -uroot -e "drop database $pname"
+	mysql -uroot -e "create database $pname"
+	gunzip < $pname.sql.gz | mysql -uroot $pname
+	echo "База данных проекта восстановлена из архива"
+	rm -f $pname.tar.gz
+	rm -f $pname.sql.gz
+	echo "Работа завершена."
+fi

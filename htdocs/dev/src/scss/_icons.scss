@@ -1,0 +1,20 @@
+@font-face {
+  font-family: "fi";
+  src: url('./fi.eot');
+  src: url('./fi.eot?#iefix') format('eot'),
+    url('./fi.woff2') format('woff2'),
+    url('./fi.woff') format('woff'),
+    url('./fi.ttf') format('truetype');
+}
+.fi {
+  font-family: "fi";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: normal;
+}
+.fi-magnifying-glass:before {
+    content: "\E001";
+}
+.fi-mail:before {
+    content: "\E002";
+}

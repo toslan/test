@@ -1,0 +1,21 @@
+// Файл для overrides, обрабатывается после _settings.
+.wheel {
+    animation-name: spin;
+    animation-duration: 600ms;
+    animation-iteration-count: 1;
+    animation-timing-function: linear;
+
+ 
+    z-index: 100;
+}
+ 
+@keyframes spin {
+    from {
+        transform:rotate(180deg);
+        opacity: 0;
+    }
+    to {
+        transform:rotate(0deg);
+        opacity: 1;
+    }
+}

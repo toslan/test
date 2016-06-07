@@ -1,0 +1,31 @@
+#!/bin/bash
+# Бэкап сайта на MODX (файлы и БД) на удаленный сервер
+if [ ! -t 1 ] ; then
+	xfce4-terminal -H -e=$0
+else
+	pname=${PWD##*/}
+	pname=${pname/./} # имя проекта = имя директории без точек
+	aname=$pname.zip # архив проекта
+	srv=circuto3@circutorcomru.420.com1.ru
+	spath=/home/circuto3/work/
+	mkdir -p backup
+	tar --exclude='htdocs/dev/node_modules' --exclude='htdocs/core/cache/*' -pczf $pname.tar.gz htdocs 
+	mysqldump -uroot $pname | gzip > $pname.sql.gz
+	rm -f $aname
+	7za a $aname $pname.tar.gz $pname.sql.gz
+	echo "Cоздан новый архив $aname"
+	cdat=$(stat --format='%Y' $aname)
+	bname=backup/$(date -d @$cdat +%y%m%d_%H%M%S)_$aname
+	cp -p $aname $bname
+	echo "Cоздан страховочный дубликат $bname"
+	rm $pname.tar.gz
+	rm $pname.sql.gz
+	ssh -q $srv exit
+	if [ $? -ne 0 ]; then
+		echo "Сервер недоступен. Завершаем работу."
+		exit
+	fi
+	scp -p $aname $srv:$spath
+	echo "Hовый архив $aname скопирован на удаленный сервер" 
+	echo "Работа завершена."
+fi
