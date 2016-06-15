@@ -10,6 +10,7 @@ UNCSS_OPTIONS:
 #    - !!js/regexp .foundation-mq
     - !!js/regexp ^\.is-.*
     - !!js/regexp ^#f-.*
+    - !!js/regexp ^\.fi-.*
 #    - !!js/regexp .menu.dropdown
 #    - !!js/regexp .dropdown.menu
 #    - !!js/regexp .slide-(in|out)-(right|left).*
@@ -148,6 +149,7 @@ FONT:
 # - "fi-indent-more.svg"
 # - "fi-info.svg"
 # - "fi-italic.svg"
+ - "fi-joule.svg"
 # - "fi-key.svg"
 # - "fi-laptop.svg"
 # - "fi-layout.svg"
