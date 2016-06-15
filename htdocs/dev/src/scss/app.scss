@@ -1,7 +1,6 @@
 @charset 'utf-8';
 @import 'vars';
 @import 'settings';
-@import 'over';
 @import 'foundation';
 @import 'motion-ui';
 
@@ -50,7 +49,4 @@
 @include motion-ui-transitions;
 @include motion-ui-animations;
 @import 'icons';
-<<<<<<< HEAD
-=======
 @import 'over';
->>>>>>> 11f7422d06b0640a0e13d216a39c7e90bf6e8700
