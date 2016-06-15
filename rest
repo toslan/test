@@ -10,12 +10,28 @@ else
 	spath=/home/circuto3/work/
 	mkdir -p backup
 	tar --exclude='htdocs/dev/node_modules' --exclude='htdocs/core/cache/*' -pczf $pname.tar.gz htdocs 
+	if [ $? -ne 0 ]; then
+		echo "Не удалось создать архив файлов $pname.tar.gz. Завершено с ошибкой !"
+		exit
+	fi
 	mysqldump -uroot $pname | gzip > $pname.sql.gz
+	if [ $? -ne 0 ]; then
+		echo "Не удалось создать архив БД $pname.sql.gz. Завершено с ошибкой !"
+		exit
+	fi
 	7za a .t.zip $pname.tar.gz $pname.sql.gz
+	if [ $? -ne 0 ]; then
+		echo "Не удалось создать временный архив .t.zip. Завершено с ошибкой !"
+		exit
+	fi
 	cdat=$(stat --format='%Y' .t.zip)
 	bname=backup/$(date -d @$cdat +%y%m%d_%H%M%S)_$aname
 	cp -p .t.zip $bname
-	echo "Cоздан страховочный текущий архив $bname"
+	if [ $? -ne 0 ]; then
+		echo "Не удалось создать страховочный текущий архив $bname !"
+	else
+		echo "Cоздан страховочный текущий архив $bname"
+	fi
 	rm .t.zip 
 	rm $pname.tar.gz
 	rm $pname.sql.gz
@@ -40,7 +56,7 @@ else
 		echo $(date -d @$ldat +'%Y.%m.%d %H:%M:%S') - время локального архива
 	fi
 	if [ $ldat -eq 0 ] && [ $rdat -eq 0 ]; then
-		echo "Нет архивов для восстановления. Завершаем работу"
+		echo "Нет архивов для восстановления. Завершено с ошибкой !"
 		exit
 	fi
 	echo Введите:
@@ -53,25 +69,34 @@ else
 	echo 0-Выход без изменений
 	read n
 	case $n in
-  0)	echo "Выходим без изменений"; exit ;;
+  0)	echo " Завершено без изменений !"; exit ;;
   1)	if [ $rdat -eq 0 ]; then
-				echo "Неправильный ввод. Выходим без изменений"
+				echo "Неправильный ввод. Завершено без изменений !"
 				exit
 			fi
 			if [ $ldat -gt 0 ]; then
    			bname=backup/$(date -d @$ldat +%y%m%d_%H%M%S)_$aname
 				cp -p $aname $bname
-				echo "Локальный архив сохранен в $bname"
-				rm $aname
+				if [ $? -ne 0 ]; then
+					echo "Не удалось создать архив $bname !"
+				else
+					echo "Локальный архив сохранен в $bname"
+					rm $aname
+				fi
 			fi
 			scp -p $srv:$spath$aname ./
-    	echo "Архив скопирован с удаленного сервера" ;;
+			if [ $? -ne 0 ]; then
+				echo "Не удалось скопировать архив с удаленного сервера. Завершено с ошибкой !"
+				exit
+			else
+				echo "Архив скопирован с удаленного сервера"
+			fi
   2)	if [ $ldat -eq 0 ]; then
-				echo "Неправильный ввод. Выходим без изменений"
+				echo "Неправильный ввод. Завершено без изменений"
 				exit
 			fi
 			echo "Восстанавливаем локальный архив";;
-  *)	echo "Неправильный ввод. Выходим без изменений"; exit ;;
+  *)	echo "Неправильный ввод. Завершено без изменений"; exit ;;
 	esac
 	rm -r -f htdocs/assets
 	rm -r -f htdocs/connectors
@@ -82,13 +107,25 @@ else
 	rm -f htdocs/dev/*
 	rm -f htdocs/*
 	7za e $aname
+	if [ $? -ne 0 ]; then
+		echo "Не удалось распаковать архив $aname. Завершено с ошибкой !"
+		exit
+	fi
 	sudo tar --same-owner -pxzf $pname.tar.gz
+	if [ $? -ne 0 ]; then
+		echo "Не удалось восстановить файлы проекта из архива $pname.tar.gz. Завершено с ошибкой !"
+		exit
+	fi
 	echo "Файлы проекта восстановлены из архива"
 	mysql -uroot -e "drop database $pname"
 	mysql -uroot -e "create database $pname"
 	gunzip < $pname.sql.gz | mysql -uroot $pname
+	if [ $? -ne 0 ]; then
+		echo "Не удалось восстановить БД из архива $pname.sql.gz. Завершено с ошибкой !"
+		exit
+	fi
 	echo "База данных проекта восстановлена из архива"
 	rm -f $pname.tar.gz
 	rm -f $pname.sql.gz
-	echo "Работа завершена."
+	echo "Завершено успешно !"
 fi
