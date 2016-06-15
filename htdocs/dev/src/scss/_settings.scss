@@ -1,4 +1,3 @@
-@import 'in';
 //  Foundation for Sites Settings
 //  -----------------------------
 //
@@ -234,19 +233,19 @@ $breadcrumbs-item-slash: true;
 // 11. Button
 // ----------
 
-$button-padding: 0.85em 1em;
+$button-padding: $button-size*0.25;
 $button-margin: 0 0 $global-margin 0;
 $button-fill: solid;
 $button-background: $primary-color;
 $button-background-hover: scale-color($button-background, $lightness: -15%);
 $button-color: $white;
 $button-color-alt: $black;
-$button-radius: $global-radius;
+$button-radius: 100rem;
 $button-sizes: (
-  tiny: 0.6rem,
-  small: 0.75rem,
-  default: 0.9rem,
-  large: 1.25rem,
+  tiny: $button-size*0.5,
+  small: $button-size*0.75,
+  default: $button-size,
+  large: $button-size*1.25,
 );
 $button-opacity-disabled: 0.25;
 
@@ -565,5 +564,3 @@ $topbar-submenu-background: $topbar-background;
 $topbar-title-spacing: 1rem;
 $topbar-input-width: 200px;
 $topbar-unstack-breakpoint: medium;
-@import 'out';
-@import 'icons';

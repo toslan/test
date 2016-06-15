@@ -12,9 +12,12 @@
   -moz-osx-font-smoothing: grayscale;
   font-weight: normal;
 }
-.fi-magnifying-glass:before {
+.fi-joule:before {
     content: "\E001";
 }
-.fi-mail:before {
+.fi-magnifying-glass:before {
     content: "\E002";
+}
+.fi-mail:before {
+    content: "\E003";
 }

@@ -10,22 +10,41 @@ else
 	spath=/home/circuto3/work/
 	mkdir -p backup
 	tar --exclude='htdocs/dev/node_modules' --exclude='htdocs/core/cache/*' -pczf $pname.tar.gz htdocs 
+	if [ $? -ne 0 ]; then
+		echo "Не удалось создать архив файлов $pname.tar.gz. Завершено с ошибкой !"
+		exit
+	fi
 	mysqldump -uroot $pname | gzip > $pname.sql.gz
+	if [ $? -ne 0 ]; then
+		echo "Не удалось создать архив БД $pname.sql.gz. Завершено с ошибкой !"
+		exit
+	fi
 	rm -f $aname
 	7za a $aname $pname.tar.gz $pname.sql.gz
+	if [ $? -ne 0 ]; then
+		echo "Не удалось создать архив $aname. Завершено с ошибкой !"
+		exit
+	fi
 	echo "Cоздан новый архив $aname"
 	cdat=$(stat --format='%Y' $aname)
 	bname=backup/$(date -d @$cdat +%y%m%d_%H%M%S)_$aname
 	cp -p $aname $bname
-	echo "Cоздан страховочный дубликат $bname"
+	if [ $? -ne 0 ]; then
+		echo "Не удалось создать страховочный дубликат $bname !"
+	else
+		echo "Cоздан страховочный дубликат $bname"
+	fi
 	rm $pname.tar.gz
 	rm $pname.sql.gz
 	ssh -q $srv exit
 	if [ $? -ne 0 ]; then
-		echo "Сервер недоступен. Завершаем работу."
+		echo "Сервер недоступен. Завершено с ошибкой !"
 		exit
 	fi
 	scp -p $aname $srv:$spath
-	echo "Hовый архив $aname скопирован на удаленный сервер" 
-	echo "Работа завершена."
+	if [ $? -ne 0 ]; then
+		echo "Не удалось скопировать архив $aname на сервер. Завершено с ошибкой !"
+	else
+		echo "Hовый архив $aname скопирован на сервер. Завершено успешно !"
+	fi
 fi
