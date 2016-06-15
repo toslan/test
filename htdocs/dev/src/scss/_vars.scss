@@ -1,3 +1,9 @@
 // Файл для новых переменных, которые потом используются, обрабатывается первым.
 // @import 'vars'; - в первой строке app.sass
-$button-size: 3rem;
+$knob-size: 2rem;
+$knob-sizes: (
+  tiny: $knob-size*0.5,
+  small: $knob-size*0.75,
+  default: $knob-size,
+  large: $knob-size*1.5,
+);

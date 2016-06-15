@@ -25,9 +25,15 @@
 .jfont {
     font-family: jFont;
 }
-.button {
-  @each $size, $value in map-remove($button-sizes, default) {
+
+.knob {
+	@extend .button;
+  border-radius: 100rem;
+  padding: $knob-size*0.25;
+  font-size: $knob-size;
+  @each $size, $value in map-remove($knob-sizes, default) {
     &.#{$size} {
+      font-size: $value;
       padding: $value*0.25;
     }
   }
